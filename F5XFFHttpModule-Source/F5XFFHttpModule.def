@@ -1,0 +1,4 @@
+LIBRARY	"F5XFFHttpModule"
+
+EXPORTS
+    RegisterModule
