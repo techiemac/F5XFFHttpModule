@@ -18,7 +18,7 @@ If you are an automation nut and like to script everything (it's a good thing), 
 Changelog
 ---------
 
-* 1.0 Initial commit
+* 1.0 Original module
 * 1.1 Modified module to pick up XFF earlier in the request pipeline
 
 Version
