@@ -20,7 +20,8 @@ Changelog
 
 * 1.0 Original module
 * 1.1 Modified module to pick up XFF earlier in the request pipeline
+* 1.2 Modified module to do a string copy of the address in order to avoid nulls in managed code buffers 
 
 Version
 -------
-The current version is 1.1
+The current version is 1.2

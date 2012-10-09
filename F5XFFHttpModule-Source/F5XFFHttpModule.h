@@ -41,6 +41,8 @@
 
 #include <stdio.h>
 
+#define HEADER_VAL_LEN 256 // ULI: Added
+
 //---------------------------------------------------------------------------
 // class CF5XFFHttpModule 
 //
@@ -54,7 +56,7 @@ class CF5XFFHttpModule : public CHttpModule
 	// Members
 	//-----------------------------------------------------------------------
 	public:
-		TCHAR *m_pszHeaderValue;
+		TCHAR m_pszHeaderValue[HEADER_VAL_LEN];
 		TCHAR m_pszHeaderName[1024];
 		HANDLE m_hEventLog;
 
@@ -88,8 +90,9 @@ class CF5XFFHttpModule : public CHttpModule
 	public:
 		void Initialize(TCHAR *szHeaderName)
 		{
-			m_pszHeaderValue = NULL;
 			SetHeaderName(szHeaderName);
+
+      memset(m_pszHeaderValue, 0x00, HEADER_VAL_LEN); // ULI Added
 
 			m_hEventLog = RegisterEventSource(NULL, _T("IISADMIN"));
 
@@ -122,7 +125,7 @@ class CF5XFFHttpModule : public CHttpModule
 	//-----------------------------------------------------------------------
 	public:
 		REQUEST_NOTIFICATION_STATUS
-		OnBeginRequest(IN IHttpContext *pHttpContext, IN IHttpEventProvider *pProvider);
+		OnBeginRequest(IN IHttpContext *pHttpContext, IN IHttpEventProvider *pProvider); // ULI Changed
 
 		REQUEST_NOTIFICATION_STATUS
 		OnSendResponse(IN IHttpContext * pHttpContext, IN ISendResponseProvider * pProvider);

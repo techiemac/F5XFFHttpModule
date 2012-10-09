@@ -94,11 +94,11 @@ CF5XFFHttpModule::WriteEventLogMessage(TCHAR *szMsg)
 //  CF5XFFHttpModule::OnAcquireRequestState
 //---------------------------------------------------------------------------
 REQUEST_NOTIFICATION_STATUS
-CF5XFFHttpModule::OnBeginRequest(IN IHttpContext *pHttpContext, IN IHttpEventProvider *pProvider)
+CF5XFFHttpModule::OnBeginRequest(IN IHttpContext *pHttpContext, IN IHttpEventProvider *pProvider) // ULI Changed
 {
     HRESULT hr = S_OK;
 
-	DebugMessage(_T("(OBR) = OnBeginRequest, header = '%s'"), GetHeaderName());
+	DebugMessage(_T("(OBR) = OnBeginRequest, header = '%s'"), GetHeaderName()); // ULI Changed
 
 	IHttpRequest *pRequest = pHttpContext->GetRequest();
 	if ( NULL != pRequest )
@@ -106,6 +106,8 @@ CF5XFFHttpModule::OnBeginRequest(IN IHttpContext *pHttpContext, IN IHttpEventPro
 		TCHAR *pszHeaderValue = NULL;
 		USHORT cchHeaderValue = 0;
 		pszHeaderValue = (TCHAR *)pRequest->GetHeader(GetHeaderName(), &cchHeaderValue);
+    m_pszHeaderValue[0] = 0x00; // ULI Added
+
 		if ( cchHeaderValue > 0 )
 		{
 			// Allocate space to to store the header
@@ -122,29 +124,30 @@ CF5XFFHttpModule::OnBeginRequest(IN IHttpContext *pHttpContext, IN IHttpEventPro
 				pszHeaderValue = (TCHAR *)pRequest->GetHeader(GetHeaderName(), &cchHeaderValue);
 				if ( pszHeaderValue != NULL )
 				{
-					DebugMessage(_T("(OBR) : Found '%s' with value of '%s'\n"), GetHeaderName(), pszHeaderValue);
+					DebugMessage(_T("(OBR) : Found '%s' with value of '%s'\n"), GetHeaderName(), pszHeaderValue); // ULI Changed
 
 					// Check for any additional proxy fields
-					// ie. X-Forwarded-For: 10.10.10.10, 1.2.3.4, 5.6.7.8
+					// ie. X-Forwarded-For: 100.100.100.100, 1.2.3.4, 5.6.7.8
 					TCHAR *sep = _tcschr(pszHeaderValue, _T(','));
 					if ( NULL != sep )
 					{
 						*sep = _T('\0');
-						DebugMessage(_T("(OBR) : Proxy detected in value, removing proxy info and using '%s'\n"), pszHeaderValue);
+						DebugMessage(_T("(OBR) : Proxy detected in value, removing proxy info and using '%s'\n"), pszHeaderValue); // ULI Changed
 					}
 					sep = _tcschr(pszHeaderValue, _T(';'));
 					if ( NULL != sep )
 					{
 						*sep = _T('\0');
-						DebugMessage(_T("(OBR) : Proxy detected in value, removing proxy info and using '%s'\n"), pszHeaderValue);
+						DebugMessage(_T("(OBR) : Proxy detected in value, removing proxy info and using '%s'\n"), pszHeaderValue); // ULI Changed
 					}
 
 					// point the header value member at the allocated XFF value.
-					m_pszHeaderValue = pszHeaderValue;
+          _tcsncpy(m_pszHeaderValue, pszHeaderValue, 64); // ULI Changed
+          m_pszHeaderValue[_tcslen(pszHeaderValue)] = 0x00; // ULI Added
 				}
 				else
 				{
-					DebugMessage(_T("(OBR) : X-Forwarded-For header value not found for URL '%s'"), pRequest->GetRawHttpRequest()->pRawUrl);
+					DebugMessage(_T("(OBR) : X-Forwarded-For header value not found for URL '%s'"), pRequest->GetRawHttpRequest()->pRawUrl); // ULI Changed
 				}
 			}
 		}
@@ -172,7 +175,7 @@ CF5XFFHttpModule::OnSendResponse(IN IHttpContext * pHttpContext, IN ISendRespons
 
 	if (TRUE == pProvider->GetReadyToLogData())
 	{
-		if ( NULL != m_pszHeaderValue )
+		if ( 0 != _tcslen(m_pszHeaderValue) )
 		{
 			// Retrieve log information.
 			PHTTP_LOG_FIELDS_DATA pLogData = (PHTTP_LOG_FIELDS_DATA)pProvider->GetLogData();
